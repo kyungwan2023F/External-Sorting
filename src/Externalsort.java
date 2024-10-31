@@ -5,7 +5,7 @@
 /**
  * The class containing the main method.
  *
- * @author {Your Name Here}
+ * @author {Jae Young}
  * @version {Put Something Here}
  */
 
