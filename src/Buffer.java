@@ -8,7 +8,7 @@ public class Buffer {
     
     //~ Constructors ..........................................................
     public Buffer() {
-        
+        data = new byte[BLOCK_SIZE];
     }
     //~Public  Methods ........................................................
     public byte[] getBlock(int block) {
