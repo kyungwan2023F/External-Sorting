@@ -35,12 +35,12 @@ public class ReplacementSelection {
         int recordsLoaded = 0;
 
         // Loop to read 8 blocks, and until heap is full
-        while (recordsLoaded < ByteFile.RECORDS_PER_BLOCK && fileParser
+        while (recordsLoaded < ByteFile.RECORDS_PER_BLOCK * 8 && fileParser
             .readNextBlock(inputBuffer)) {
             ByteBuffer byteBuffer = ByteBuffer.wrap(inputBuffer);
 
-            for (int i = 0; i < ByteFile.RECORDS_PER_BLOCK
-                && recordsLoaded < ByteFile.RECORDS_PER_BLOCK; i++) {
+            while (byteBuffer.hasRemaining()
+                && recordsLoaded < ByteFile.RECORDS_PER_BLOCK * 8) {
                 long recID = byteBuffer.getLong(); // Read 8 bytes for recID
                 double key = byteBuffer.getDouble(); // Read 8 bytes for key
 
