@@ -4,7 +4,7 @@ import java.io.RandomAccessFile;
 
 public class FileParser {
     // ~ Fields ................................................................
-    private RandomAccessFile file;
+    RandomAccessFile file;
 
     // ~ Constructors ..........................................................
     /**
@@ -16,7 +16,7 @@ public class FileParser {
      *             if the file cannot be opened.
      */
     public FileParser(String filename) throws IOException {
-        this.file = new RandomAccessFile(new File(filename), "r");
+        this.file = new RandomAccessFile(new File(filename), "rw");
     }
 
 
@@ -47,16 +47,31 @@ public class FileParser {
             return false;
         }
     }
-    
+
+
     /**
      * Closes the file after reading is complete.
      *
-     * @throws IOException if an error occurs while closing the file.
+     * @throws IOException
+     *             if an error occurs while closing the file.
      */
     public void close() throws IOException {
         if (file != null) {
             file.close();
         }
-    }   
-    
+    }
+
+
+    /**
+     * Writes a block of data from the provided buffer to the file.
+     *
+     * @param buffer
+     *            output buffer containing data to write.
+     * @throws IOException
+     *             if there is an error writing to the file.
+     */
+    public void writeBlock(byte[] buffer) throws IOException {
+        file.write(buffer); // Writes the content of buffer to the file
+    }
+
 }

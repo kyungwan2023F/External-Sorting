@@ -195,6 +195,16 @@ class MinHeap<T extends Comparable<T>> {
         }
         return heap[n];
     }
+    
+    // ----------------------------------------------------------
+    /**
+     * Return the minimum value without removing it.
+     * @return minimum value
+     */
+    public T storeMin() {
+        assert n > 0 : "Heap is empty; cannot store minimum";
+        return heap[0];
+    }
 
 
     // ----------------------------------------------------------
