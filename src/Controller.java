@@ -85,13 +85,13 @@ public class Controller {
      * @throws IOException
      */
     public void replacementSelectionSort() throws IOException {
-        System.out.println(fileParser.file.length());
-        if (fileParser.file.length() <= ByteFile.BYTES_PER_BLOCK * 8) {
-            replacementSelection.inMemorySort(fileParser);
-        }
-        else {
-            System.out.println("The file has more than 8 blocks.");
-        }
+        replacementSelection.inMemorySort(fileParser);
+//        if (fileParser.file.length() <= ByteFile.BYTES_PER_BLOCK * 8) {
+//            replacementSelection.inMemorySort(fileParser);
+//        }
+//        else {
+//            System.out.println("The file has more than 8 blocks.");
+//        }
         this.report();
     }
 

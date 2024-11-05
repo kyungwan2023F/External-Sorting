@@ -2,6 +2,7 @@
  * {Project Description Here}
  */
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -39,8 +40,9 @@ public class Externalsort {
      */
     public static void main(String[] args) {
         // Get the filename from arguments
-        String filename = args[0];
-
+        //String filename = args[0];
+        
+        String filename = "testData/sampleInput16.bin";
         try {
             // Initialize the Controller with the given filename
             Controller controller = new Controller(filename);
