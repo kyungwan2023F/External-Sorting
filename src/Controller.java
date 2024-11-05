@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 public class Controller {
     // ~ Fields ................................................................
@@ -29,58 +30,93 @@ public class Controller {
         // Initialize ReplacementSelection with input buffer, output buffer, and
         // minHeap
         this.replacementSelection = new ReplacementSelection(minHeap,
-            inputBuffer, outputBuffer, fileParser);
+            inputBuffer, outputBuffer);
     }
 
-
     // ~Public Methods ........................................................
-//    private void initializeHeap() throws IOException {
-//        int recordsLoaded = 0;
+// private void initializeHeap() throws IOException {
+// int recordsLoaded = 0;
 //
-//        // Loop to read 8 blocks, and until heap is full
-//        while (recordsLoaded < ByteFile.RECORDS_PER_BLOCK * 8 && fileParser
-//            .readNextBlock(inputBuffer)) {
-//            ByteBuffer byteBuffer = ByteBuffer.wrap(inputBuffer);
+// // Loop to read 8 blocks, and until heap is full
+// while (recordsLoaded < ByteFile.RECORDS_PER_BLOCK * 8 && fileParser
+// .readNextBlock(inputBuffer)) {
+// ByteBuffer byteBuffer = ByteBuffer.wrap(inputBuffer);
 //
-//            while (byteBuffer.hasRemaining()
-//                && recordsLoaded < ByteFile.RECORDS_PER_BLOCK * 8) {
-//                long recID = byteBuffer.getLong(); // Read 8 bytes for recID
-//                double key = byteBuffer.getDouble(); // Read 8 bytes for key
+// while (byteBuffer.hasRemaining()
+// && recordsLoaded < ByteFile.RECORDS_PER_BLOCK * 8) {
+// long recID = byteBuffer.getLong(); // Read 8 bytes for recID
+// double key = byteBuffer.getDouble(); // Read 8 bytes for key
 //
-//                Record record = new Record(recID, key); // Create the record
-//                minHeap.insert(record); // Insert record into the heap
-//                recordsLoaded++;
-//            }
-//        }
-//    }
+// Record record = new Record(recID, key); // Create the record
+// minHeap.insert(record); // Insert record into the heap
+// recordsLoaded++;
+// }
+// }
+// }
 
 
     private void initializeHeap() throws IOException {
+        // Define a buffer to hold 8 blocks of data
         byte[] largeInputBuffer = new byte[ByteFile.BYTES_PER_BLOCK * 8];
 
-        if (fileParser.readNextBlock(largeInputBuffer)) {
-            ByteBuffer byteBuffer = ByteBuffer.wrap(largeInputBuffer);
+        // Use FileParser to read the first 8 blocks directly into the buffer
+        if (fileParser.file.getFilePointer() == 0) { // Start from the beginning
+            fileParser.file.readFully(largeInputBuffer);
+        }
 
-            // Iterate over each record
-            for (int rec = 0; rec < ByteFile.RECORDS_PER_BLOCK * 8; rec++) {
-                long recID = byteBuffer.getLong(); // 8 bytes for recID
-                double key = byteBuffer.getDouble(); // 8 bytes for key
+        // Wrap the buffer in a ByteBuffer for easy data access
+        ByteBuffer byteBuffer = ByteBuffer.wrap(largeInputBuffer);
 
-                // Create and insert record into the heap
-                Record record = new Record(recID, key);
-                minHeap.insert(record);
-            }
+        // Iterate over each record in the buffer and add to the heap
+        for (int rec = 0; rec < ByteFile.RECORDS_PER_BLOCK * 8; rec++) {
+            long recID = byteBuffer.getLong(); // Read 8 bytes for recID
+            double key = byteBuffer.getDouble(); // Read 8 bytes for key
+
+            // Create and insert the record into the minHeap
+            Record record = new Record(recID, key);
+            minHeap.insert(record);
         }
     }
 
 
+    // ----------------------------------------------------------
+    /**
+     * Place a description of your method here.
+     * @throws IOException
+     */
     public void replacementSelectionSort() throws IOException {
         System.out.println(fileParser.file.length());
         if (fileParser.file.length() <= ByteFile.BYTES_PER_BLOCK * 8) {
-            replacementSelection.inMemorySort();
+            replacementSelection.inMemorySort(fileParser);
         }
         else {
             System.out.println("The file has more than 8 blocks.");
+        }
+        this.report();
+    }
+
+
+    private void report() throws IOException {
+        fileParser.file.seek(0);
+
+        int recordsPerLine = 0; // Counter to track the number of records
+                                // printed per line
+
+        while (fileParser.readNextBlock(inputBuffer)) {
+            // Read the first record of the block (16 bytes)
+            ByteBuffer byteBuffer = ByteBuffer.wrap(inputBuffer);
+            long recID = byteBuffer.getLong(); // Get the record ID
+            double key = byteBuffer.getDouble(); // Get the key
+
+            // Print the record (ID and key)
+            System.out.print(recID + " " + key + " ");
+            recordsPerLine++;
+
+            // Print a new line after every 5 records
+            if (recordsPerLine == 5) {
+                System.out.println();
+                recordsPerLine = 0;
+            }
         }
         fileParser.close();
     }

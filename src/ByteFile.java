@@ -4,6 +4,7 @@ import java.util.Random;
 import student.TestableRandom;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 /**
  * Basic handling of binary data files.
@@ -86,7 +87,7 @@ public class ByteFile {
             for (int rec = 0; rec < RECORDS_PER_BLOCK; rec++) {
                 // puts the data in the basicBuffer...
                 bb.putLong(rng.nextLong()); // a random recID
-                bb.putDouble(rng.nextDouble()); // a random recKey
+                bb.putDouble(rng.nextDouble() * 1e100); // a random recKey
             }
             raf.write(basicBuffer);
             // ^^^ the slow operation! However, using one large

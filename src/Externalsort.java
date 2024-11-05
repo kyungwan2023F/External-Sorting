@@ -2,6 +2,8 @@
  * {Project Description Here}
  */
 
+import java.io.IOException;
+
 /**
  * The class containing the main method.
  *
@@ -33,11 +35,26 @@ public class Externalsort {
 
     /**
      * @param args
-     *     Command line parameters
+     *            Command line parameters
      */
     public static void main(String[] args) {
-        
-        
+        // Get the filename from arguments
+        String filename = args[0];
+
+        try {
+            // Initialize the Controller with the given filename
+            Controller controller = new Controller(filename);
+
+            // Perform the sorting
+            controller.replacementSelectionSort();
+
+        }
+        catch (IOException e) {
+            System.err.println("An error occurred while processing the file: "
+                + e.getMessage());
+            e.printStackTrace();
+        }
+
     }
 
 }

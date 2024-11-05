@@ -1,6 +1,8 @@
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 public class FileParser {
     // ~ Fields ................................................................
@@ -71,7 +73,18 @@ public class FileParser {
      *             if there is an error writing to the file.
      */
     public void writeBlock(byte[] buffer) throws IOException {
-        file.write(buffer); // Writes the content of buffer to the file
+        // Set up a ByteBuffer around the buffer with a specific endianness
+        ByteBuffer bb = ByteBuffer.wrap(buffer); 
+
+        // Iterate over each record in the buffer and write them individually
+        for (int i = 0; i < ByteFile.RECORDS_PER_BLOCK; i++) {
+            long recID = bb.getLong();
+            double key = bb.getDouble();
+
+            // Write the record directly to the file as bytes
+            file.writeLong(recID);
+            file.writeDouble(key);
+        }
     }
 
 }
