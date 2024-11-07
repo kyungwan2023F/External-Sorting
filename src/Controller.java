@@ -98,7 +98,7 @@ public class Controller {
 
     private void report() throws IOException {
         fileParser.file.seek(0);
-
+        
         int recordsPerLine = 0; // Counter to track the number of records
                                 // printed per line
 

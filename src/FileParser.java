@@ -2,7 +2,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 
 public class FileParser {
     // ~ Fields ................................................................
@@ -21,7 +20,7 @@ public class FileParser {
         this.file = new RandomAccessFile(new File(filename), "rw");
     }
 
-
+    
     /**
      * Reads the next block of data into the provided buffer.
      *
@@ -49,6 +48,8 @@ public class FileParser {
             return false;
         }
     }
+    
+    
 
 
     /**
@@ -73,8 +74,8 @@ public class FileParser {
      *             if there is an error writing to the file.
      */
     public void writeBlock(byte[] buffer) throws IOException {
-        // Set up a ByteBuffer around the buffer with a specific endianness
-        ByteBuffer bb = ByteBuffer.wrap(buffer); 
+        // Set up a ByteBuffer around the buffer
+        ByteBuffer bb = ByteBuffer.wrap(buffer);
 
         // Iterate over each record in the buffer and write them individually
         for (int i = 0; i < ByteFile.RECORDS_PER_BLOCK; i++) {
@@ -85,6 +86,17 @@ public class FileParser {
             file.writeLong(recID);
             file.writeDouble(key);
         }
+    }
+
+
+    // ----------------------------------------------------------
+    /**
+     * Place a description of your method here.
+     * @return
+     * @throws IOException
+     */
+    public boolean hasRemainingData() throws IOException {
+        return file.getFilePointer() < file.length();
     }
 
 }
