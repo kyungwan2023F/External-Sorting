@@ -1,6 +1,4 @@
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.nio.ByteBuffer;
 
 public class FileParser {
@@ -45,13 +43,13 @@ public class FileParser {
 
     /**
      * Replaces the current file with the sorted file.
-     * @param newFilePath 
+     * 
+     * @param newFilePath
      *
      * @throws IOException
      *             if any file operation fails.
      */
-    public void replaceWith(String newFilePath)
-        throws IOException {
+    public void replaceWith(String newFilePath) throws IOException {
         File oldFile = new File(this.filePath);
         File newFile = new File(newFilePath);
 
@@ -79,24 +77,28 @@ public class FileParser {
      * Reads the next block of data into the provided buffer.
      *
      * @param buffer
-     *            input buffer to store data (up to buffer.length bytes).
+     *            input buffer to store data (exactly buffer.length bytes).
      * @return the number of bytes actually read, or -1 if end of file was
-     *         reached.
+     *         reached before any bytes were read.
      * @throws IOException
      *             if there is an error reading the file.
      */
     public int readNextBlock(byte[] buffer) throws IOException {
-        if (file.getFilePointer() >= file.length()) {
-            return -1; // End of file reached
-        }
-
-        long bytesRemaining = file.length() - file.getFilePointer();
-        int bytesToRead = (int)Math.min(buffer.length, bytesRemaining);
-
-        int bytesRead = file.read(buffer, 0, bytesToRead);
-
-        if (bytesRead == -1) {
-            return -1; // End of file reached
+        int bytesRead = 0;
+        while (bytesRead < buffer.length) {
+            int result = file.read(buffer, bytesRead, buffer.length
+                - bytesRead);
+            if (result == -1) {
+                // If no bytes have been read yet, indicate EOF with -1
+                if (bytesRead == 0) {
+                    return -1;
+                }
+                else {
+                    // Return the number of bytes read so far
+                    break;
+                }
+            }
+            bytesRead += result;
         }
         return bytesRead;
     }

@@ -100,17 +100,6 @@ public class ReplacementSelection {
     }
 
 
-    // ----------------------------------------------------------
-    /**
-     * Place a description of your method here.
-     * 
-     * @param inputParser
-     * @param runFileParser
-     * 
-     * @return
-     * 
-     * @throws IOException
-     */
     public DLList performReplacementSelection(
         FileParser inputParser,
         FileParser runFileParser)
@@ -189,6 +178,38 @@ public class ReplacementSelection {
             runList.add(newRun);
             runNum++;
         }
+
+        // After all input is processed, process the remaining elements in the
+        // heap
+        if (minheap.heapSize() > 0) {
+            // Track the start position for the final run
+            start = end;
+
+            while (minheap.heapSize() > 0) {
+                Record minRecord = minheap.removeMin();
+                outputIndex = addToOutputBuffer(minRecord, outputIndex);
+
+                // Update end position
+                end += ByteFile.BYTES_PER_RECORD;
+
+                // Write output buffer to file when full
+                if (outputIndex >= ByteFile.BYTES_PER_BLOCK) {
+                    runFileParser.writeBlock(outputBuffer);
+                    outputIndex = 0; // Reset for next block
+                }
+            }
+
+            // Write any remaining data in the output buffer to the run file
+            if (outputIndex > 0) {
+                runFileParser.getFile().write(outputBuffer, 0, outputIndex);
+            }
+
+            // Calculate run length and create a final Run object
+            long finalRunLength = end - start;
+            Run finalRun = new Run(start, finalRunLength, end, runNum);
+            runList.add(finalRun);
+        }
+
         inputParser.replaceWith(runFileParser.getFileName());
         System.out.println("Replacing " + inputParser.getFileName() + " with "
             + runFileParser.getFileName());
