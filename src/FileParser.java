@@ -5,7 +5,8 @@ import java.nio.ByteBuffer;
 
 public class FileParser {
     // ~ Fields ................................................................
-    RandomAccessFile file;
+    private RandomAccessFile file;
+    private String filePath;
 
     // ~ Constructors ..........................................................
     /**
@@ -18,38 +19,87 @@ public class FileParser {
      */
     public FileParser(String filename) throws IOException {
         this.file = new RandomAccessFile(new File(filename), "rw");
+        this.filePath = filename;
     }
 
-    
+
+    /**
+     * Returns the name of the file associated with this FileParser.
+     *
+     * @return The name of the file.
+     */
+    public String getFileName() {
+        return this.filePath;
+    }
+
+
+    /**
+     * Returns the name of the file associated with this FileParser.
+     *
+     * @return The name of the file.
+     */
+    public RandomAccessFile getFile() {
+        return this.file;
+    }
+
+
+    /**
+     * Replaces the current file with the sorted file.
+     * @param newFilePath 
+     *
+     * @throws IOException
+     *             if any file operation fails.
+     */
+    public void replaceWith(String newFilePath)
+        throws IOException {
+        File oldFile = new File(this.filePath);
+        File newFile = new File(newFilePath);
+
+        // Close the current file before performing file operations
+        this.close();
+
+        // Delete the old file if it exists
+        if (oldFile.exists()) {
+            oldFile.delete();
+        }
+        else {
+            throw new IOException(
+                "Failed to delete the old file or file doesn't exist.");
+        }
+
+        // Rename the new file to have the same name as the old file
+        newFile.renameTo(oldFile);
+
+        // Reopen the file after replacement
+        this.file = new RandomAccessFile(new File(this.filePath), "rw");
+    }
+
+
     /**
      * Reads the next block of data into the provided buffer.
      *
      * @param buffer
-     *            input buff of size 8192 to store one block of data.
-     * @return true if data was read successfully, false if end of file was
+     *            input buffer to store data (up to buffer.length bytes).
+     * @return the number of bytes actually read, or -1 if end of file was
      *         reached.
      * @throws IOException
-     *             if there is an error reading the file or if end of file is
-     *             reached unexpectedly.
+     *             if there is an error reading the file.
      */
-    public boolean readNextBlock(byte[] buffer) throws IOException {
+    public int readNextBlock(byte[] buffer) throws IOException {
         if (file.getFilePointer() >= file.length()) {
-            return false; // End of file reached
+            return -1; // End of file reached
         }
 
-        try {
-            file.readFully(buffer); // Reads exactly buffer.length bytes into
-                                    // buffer
-            return true;
+        long bytesRemaining = file.length() - file.getFilePointer();
+        int bytesToRead = (int)Math.min(buffer.length, bytesRemaining);
+
+        int bytesRead = file.read(buffer, 0, bytesToRead);
+
+        if (bytesRead == -1) {
+            return -1; // End of file reached
         }
-        catch (IOException e) {
-            // This exception could indicate that we're trying to read beyond
-            // the end of the file
-            return false;
-        }
+        return bytesRead;
     }
-    
-    
 
 
     /**
@@ -92,6 +142,7 @@ public class FileParser {
     // ----------------------------------------------------------
     /**
      * Place a description of your method here.
+     * 
      * @return
      * @throws IOException
      */

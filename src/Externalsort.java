@@ -39,6 +39,9 @@ public class Externalsort {
      *            Command line parameters
      */
     public static void main(String[] args) {
+        if (args.length < 1) {
+            return;
+        }
         // Get the filename from arguments
         String filename = args[0];
         
@@ -48,7 +51,7 @@ public class Externalsort {
             Controller controller = new Controller(filename);
 
             // Perform the sorting
-            controller.replacementSelectionSort();
+            controller.performSorting();
 
         }
         catch (IOException e) {

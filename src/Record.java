@@ -14,6 +14,7 @@ public class Record
 
     private long            recID;
     private double          key;
+    private int runNum;
 
     /**
      * The constructor for the Record class
@@ -23,10 +24,11 @@ public class Record
      * @param key
      *            record key
      */
-    public Record(long recID, double key)
+    public Record(long recID, double key,int runNum)
     {
         this.recID = recID;
         this.key = key;
+        this.runNum = runNum;
     }
 
 
@@ -51,6 +53,15 @@ public class Record
     public double getKey()
     {
         return key;
+    }
+    
+    // ----------------------------------------------------------
+    /**
+     * Place a description of your method here.
+     * @return
+     */
+    public int getRunNum() {
+        return runNum;
     }
 
 
