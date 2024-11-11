@@ -4,7 +4,7 @@ public class ReplacementSelectionTest {
 
     public static void main(String[] args) throws IOException {
         String filename = "testData.bin";
-        int numBlocks = 16; // Define the number of blocks for testing
+        int numBlocks = 9; // Define the number of blocks for testing
 
         // Step 1: Create a binary file with random records
         ByteFile byteFile = new ByteFile(filename, numBlocks);

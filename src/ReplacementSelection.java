@@ -128,13 +128,17 @@ public class ReplacementSelection {
             // Track the start position of the run
             start = end; // Start from the last end position
 
-            if (!byteBuffer.hasRemaining()) {
+            if (inputParser.hasRemainingData() && !byteBuffer.hasRemaining()) {
                 inputParser.readNextBlock(inputBuffer);
                 byteBuffer = ByteBuffer.wrap(inputBuffer); // 0 for new block
             }
 
-
             while (minheap.heapSize() > 0) {
+                if (!byteBuffer.hasRemaining() && !inputParser
+                    .hasRemainingData()) {
+                    position = inputParser.getFile().getFilePointer();
+                    boolean isThisTrue = true;
+                }
                 Record minRecord = minheap.getMin(); // getMin
                 // Add minRecord to output buffer
                 outputIndex = addToOutputBuffer(minRecord, outputIndex);
@@ -147,69 +151,37 @@ public class ReplacementSelection {
                     runFileParser.writeBlock(outputBuffer);
                     outputIndex = 0; // Reset for next block
                 }
-                // Normal Replacement Selection
-                if (inputParser.hasRemainingData()) {
-                    // Check if enough bytes are remaining to read recID and key
-                    if (byteBuffer.remaining() >= ByteFile.BYTES_PER_RECORD) {
-                        long recID = byteBuffer.getLong(); // Read 8 bytes for
-                                                           // recID
-                        double key = byteBuffer.getDouble(); // Read 8 bytes for
-                                                             // key
-                        inputIndex += ByteFile.BYTES_PER_RECORD;
 
-                        Record record = new Record(recID, key, -1); // Create
-                                                                    // Record
-                                                                    // object
+                // Check if enough bytes are remaining to read recID and key
+                if (byteBuffer.remaining() >= ByteFile.BYTES_PER_RECORD) {
+                    long recID = byteBuffer.getLong(); // Read 8 bytes for recID
+                    double key = byteBuffer.getDouble(); // Read 8 bytes for key
+                    inputIndex += ByteFile.BYTES_PER_RECORD;
 
-                        // Insert the record back into the heap as per
-                        // replacement
-                        // selection rules
-                        if (record.getKey() >= minRecord.getKey()) {
-                            // replace that with current min
-                            minheap.replaceMin(record);
-                        }
-                        else {
-                            minheap.replaceMin(record);
-                            minheap.removeMin(); // Hide min record from the
-                                                 // current
-                                                 // run
-                            storedMins++;
-                        }
+                    Record record = new Record(recID, key, -1); // Create Record
+                                                                // object
+
+                    // Insert the record back into the heap as per replacement
+                    // selection rules
+                    if (record.getKey() >= minRecord.getKey()) {
+                        // replace that with current min
+                        minheap.replaceMin(record);
                     }
-
-                    // Check if inputBuffer needs to be reloaded
-                    if (!byteBuffer.hasRemaining() && inputParser
-                        .hasRemainingData()) {
-                        inputParser.readNextBlock(inputBuffer);
-                        byteBuffer = ByteBuffer.wrap(inputBuffer); // Reset
-                                                                   // position
-                                                                   // to 0 for
-                                                                   // new
-                                                                   // block
+                    else {
+                        minheap.replaceMin(record);
+                        minheap.removeMin(); // Hide min record from the current
+                                             // run
+                        storedMins++;
                     }
-
                 }
-                // When all input has been read but still records in heap
-                else {
-                    // No more data in inputParser, process the remaining heap
-                    // elements
-                    while (minheap.heapSize() > 0) {
-                        minRecord = minheap.removeMin(); // Remove and
-                                                         // get the min
 
-                        // Add minRecord to output buffer
-                        outputIndex = addToOutputBuffer(minRecord, outputIndex);
-
-                        // Update end position with each record processed
-                        end += ByteFile.BYTES_PER_RECORD;
-
-                        // Write output buffer to file when full
-                        if (outputIndex >= ByteFile.BYTES_PER_BLOCK) {
-                            runFileParser.writeBlock(outputBuffer);
-                            outputIndex = 0; // Reset for the next block
-                        }
-                    }
-
+                // Check if inputBuffer needs to be reloaded
+                if (!byteBuffer.hasRemaining() && inputParser
+                    .hasRemainingData()) {
+                    inputParser.readNextBlock(inputBuffer);
+                    byteBuffer = ByteBuffer.wrap(inputBuffer); // Reset position
+                                                               // to 0 for new
+                                                               // block
                 }
             }
 
@@ -239,7 +211,7 @@ public class ReplacementSelection {
             runList.add(newRun);
             runNum++;
 
-            if (storedMins > 0) {
+            if (storedMins >= ByteFile.BYTES_PER_BLOCK) {
                 // Reset heap for the next run
                 minheap.setHeapSize(storedMins);
                 minheap.buildHeap(); // Rebuild heap based on underlying heap
