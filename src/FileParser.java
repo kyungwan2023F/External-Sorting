@@ -45,7 +45,7 @@ public class FileParser {
      * Replaces the current file with the sorted file.
      * 
      * @param newFilePath
-     *
+     *            Path of the new file to replace the current file with.
      * @throws IOException
      *             if any file operation fails.
      */
@@ -58,18 +58,23 @@ public class FileParser {
 
         // Delete the old file if it exists
         if (oldFile.exists()) {
-            oldFile.delete();
+            if (!oldFile.delete()) {
+                throw new IOException("Failed to delete the old file.");
+            }
         }
         else {
-            throw new IOException(
-                "Failed to delete the old file or file doesn't exist.");
+            throw new IOException("Old file doesn't exist.");
         }
 
         // Rename the new file to have the same name as the old file
-        newFile.renameTo(oldFile);
+        if (!newFile.renameTo(oldFile)) {
+            throw new IOException(
+                "Failed to rename the new file to the old file's name.");
+        }
 
-        // Reopen the file after replacement
-        this.file = new RandomAccessFile(new File(this.filePath), "rw");
+        // Reopen the file after replacement and reset the RandomAccessFile
+        // instance
+        this.file = new RandomAccessFile(oldFile, "rw");
     }
 
 
@@ -84,23 +89,14 @@ public class FileParser {
      *             if there is an error reading the file.
      */
     public int readNextBlock(byte[] buffer) throws IOException {
-        int bytesRead = 0;
-        while (bytesRead < buffer.length) {
-            int result = file.read(buffer, bytesRead, buffer.length
-                - bytesRead);
-            if (result == -1) {
-                // If no bytes have been read yet, indicate EOF with -1
-                if (bytesRead == 0) {
-                    return -1;
-                }
-                else {
-                    // Return the number of bytes read so far
-                    break;
-                }
-            }
-            bytesRead += result;
+        try {
+            file.readFully(buffer);
+            return buffer.length;
         }
-        return bytesRead;
+        catch (EOFException e) {
+            // Return -1 if end of file is reached before filling the buffer
+            return -1;
+        }
     }
 
 

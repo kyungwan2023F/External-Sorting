@@ -49,7 +49,7 @@ class MinHeap<T extends Comparable<T>> {
     public static int leftChild(int pos) {
         return 2 * pos + 1;
     }
-    
+
 
     /**
      * Return position for right child of pos
@@ -85,16 +85,18 @@ class MinHeap<T extends Comparable<T>> {
     public void setHeapSize(int newSize) {
         n = newSize;
     }
-    
+
+
     /**
      * Return current size of the heap
      *
-     * @return current heapSize 
+     * @return current heapSize
      */
     // Return current size of the heap
     public int heapSize() {
         return n;
     }
+
 
     /**
      * own descriptive comment
@@ -193,24 +195,50 @@ class MinHeap<T extends Comparable<T>> {
             swap(0, n); // Swap minimum with last value
             siftDown(0); // Put new heap root val in correct place
         }
-        T minValue = heap[n]; // Store the removed min value
-        heap[n] = null; // Clear the last element 
+        return heap[n];
+    }
+
+    /**
+     * Replaces the minimum element (root) with a new value, then re-organizes
+     * the heap to maintain the min-heap property.
+     * 
+     * @param newValue
+     *            The new value to replace the minimum with.
+     * @return The original minimum value that was replaced.
+     */
+    public T replaceMin(T newValue) {
+        assert n > 0 : "Heap is empty; cannot replace minimum";
+
+        // Store the current minimum value to return it later
+        T minValue = heap[0];
+
+        // Replace the root (minimum) with the new value
+        heap[0] = newValue;
+
+        // Perform siftDown to restore the min-heap property
+        siftDown(0);
+
+        // Return the original minimum value
         return minValue;
     }
-    
+
+
     // ----------------------------------------------------------
     /**
      * Return the minimum value without removing it.
+     * 
      * @return minimum value
      */
     public T getMin() {
         assert n > 0 : "Heap is empty; no minimum";
         return heap[0];
     }
-    
+
+
     // ----------------------------------------------------------
     /**
      * Place a description of your method here.
+     * 
      * @return minimum value
      */
     public T storeMin() {
@@ -241,7 +269,7 @@ class MinHeap<T extends Comparable<T>> {
         }
         return heap[n];
     }
-    
+
 
     /**
      * Modify the value at the given position, then sift it around
@@ -297,6 +325,8 @@ class MinHeap<T extends Comparable<T>> {
      * @return boolean
      */
     private boolean isLessThan(int pos1, int pos2) {
+        T temp = heap[pos1];
+        T temp1 = heap[pos2];
         return heap[pos1].compareTo(heap[pos2]) < 0;
     }
 }
