@@ -325,8 +325,6 @@ class MinHeap<T extends Comparable<T>> {
      * @return boolean
      */
     private boolean isLessThan(int pos1, int pos2) {
-        T temp = heap[pos1];
-        T temp1 = heap[pos2];
         return heap[pos1].compareTo(heap[pos2]) < 0;
     }
 }
