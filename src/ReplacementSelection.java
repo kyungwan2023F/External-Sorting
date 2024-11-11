@@ -133,8 +133,6 @@ public class ReplacementSelection {
                 byteBuffer = ByteBuffer.wrap(inputBuffer); // 0 for new block
             }
 
-            int orgSize = minheap.heapSize();
-            int lastIndex = orgSize - 1;
 
             while (minheap.heapSize() > 0) {
                 Record minRecord = minheap.getMin(); // getMin
