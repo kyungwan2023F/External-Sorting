@@ -220,7 +220,7 @@ public class ReplacementSelection {
             }
             storedMins = 0;
         }
-        runFileParser.close();
+        long length = runFileParser.getFile().length();
         inputParser.replaceWith(runFileParser.getFileName());
         System.out.println(runList.size());
         return runList;
@@ -335,7 +335,7 @@ public class ReplacementSelection {
                 double key = byteBuffer.getDouble(); // Read 8 bytes for key
 
                 // Check if this is the last record in the block
-                if (rec == ByteFile.RECORDS_PER_BLOCK - 1) {
+                if (rec == ByteFile.RECORDS_PER_BLOCK) {
                     // If this is the last record, mark it with the runNum
                     Record record = new Record(recID, key, runsToMerge.get(i)
                         .getRunNum()); // put in run number for last record of

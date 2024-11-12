@@ -55,6 +55,7 @@ public class FileParser {
 
         // Close the current file before performing file operations
         this.close();
+        newFile.close();
 
         // Delete the old file if it exists
         if (oldFile.exists()) {
