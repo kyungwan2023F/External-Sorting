@@ -113,6 +113,7 @@ public class ReplacementSelection {
         FileParser inputParser,
         FileParser runFileParser)
         throws IOException {
+        runFileParser.getFile().seek(0);
         int inputIndex = 0;
         int outputIndex = 0;
         int storedMins = 0;
@@ -123,8 +124,9 @@ public class ReplacementSelection {
         long end = 0; // End position of the run
         DLList runList = new DLList();
         int runNum = 0; // Start runNum at 0
+        Record minRecord;
 
-        while (inputParser.hasRemainingData()) {
+        while (inputParser.hasRemainingData() || minheap.heapSize() > 0) {
             // Track the start position of the run
             start = end; // Start from the last end position
 
@@ -133,55 +135,52 @@ public class ReplacementSelection {
                 byteBuffer = ByteBuffer.wrap(inputBuffer); // 0 for new block
             }
 
-            while (minheap.heapSize() > 0) {
-                if (!byteBuffer.hasRemaining() && !inputParser
-                    .hasRemainingData()) {
-                    position = inputParser.getFile().getFilePointer();
-                    boolean isThisTrue = true;
-                }
-                Record minRecord = minheap.getMin(); // getMin
-                // Add minRecord to output buffer
-                outputIndex = addToOutputBuffer(minRecord, outputIndex);
-
-                // Update end position with each record processed
-                end += ByteFile.BYTES_PER_RECORD;
-
-                // Write output buffer to file when full
-                if (outputIndex >= ByteFile.BYTES_PER_BLOCK) {
-                    runFileParser.writeBlock(outputBuffer);
-                    outputIndex = 0; // Reset for next block
-                }
-
-                // Check if enough bytes are remaining to read recID and key
-                if (byteBuffer.remaining() >= ByteFile.BYTES_PER_RECORD) {
-                    long recID = byteBuffer.getLong(); // Read 8 bytes for recID
-                    double key = byteBuffer.getDouble(); // Read 8 bytes for key
-                    inputIndex += ByteFile.BYTES_PER_RECORD;
-
-                    Record record = new Record(recID, key, -1); // Create Record
-                                                                // object
-
-                    // Insert the record back into the heap as per replacement
-                    // selection rules
-                    if (record.getKey() >= minRecord.getKey()) {
-                        // replace that with current min
-                        minheap.replaceMin(record);
+            while (minheap.heapSize() > 0
+                || storedMins >= ByteFile.RECORDS_PER_BLOCK * 8) {
+                if (minheap.heapSize() > 0) {
+                    if (!byteBuffer.hasRemaining() && !inputParser
+                        .hasRemainingData()) {
+                        minRecord = minheap.removeMin();
                     }
                     else {
-                        minheap.replaceMin(record);
-                        minheap.removeMin(); // Hide min record from the current
-                                             // run
-                        storedMins++;
+                        minRecord = minheap.getMin();
+                    }
+
+                    outputIndex = addToOutputBuffer(minRecord, outputIndex);
+                    end += ByteFile.BYTES_PER_RECORD;
+
+                    if (outputIndex >= ByteFile.BYTES_PER_BLOCK) {
+                        runFileParser.writeBlock(outputBuffer);
+                        outputIndex = 0;
+                    }
+
+                    if (byteBuffer.remaining() >= ByteFile.BYTES_PER_RECORD) {
+                        long recID = byteBuffer.getLong();
+                        double key = byteBuffer.getDouble();
+                        inputIndex += ByteFile.BYTES_PER_RECORD;
+
+                        Record record = new Record(recID, key, -1);
+
+                        if (record.getKey() >= minRecord.getKey()) {
+                            minheap.replaceMin(record);
+                        }
+                        else {
+                            minheap.replaceMin(record);
+                            minheap.removeMin();
+                            storedMins++;
+                        }
+                    }
+
+                    if (!byteBuffer.hasRemaining() && inputParser
+                        .hasRemainingData()) {
+                        inputParser.readNextBlock(inputBuffer);
+                        byteBuffer = ByteBuffer.wrap(inputBuffer);
                     }
                 }
-
-                // Check if inputBuffer needs to be reloaded
-                if (!byteBuffer.hasRemaining() && inputParser
-                    .hasRemainingData()) {
-                    inputParser.readNextBlock(inputBuffer);
-                    byteBuffer = ByteBuffer.wrap(inputBuffer); // Reset position
-                                                               // to 0 for new
-                                                               // block
+                else {
+                    // Heap is empty
+                    // Break out to start a new run
+                    break;
                 }
             }
 
@@ -211,14 +210,17 @@ public class ReplacementSelection {
             runList.add(newRun);
             runNum++;
 
-            if (storedMins >= ByteFile.BYTES_PER_BLOCK) {
-                // Reset heap for the next run
+            if (storedMins < ByteFile.RECORDS_PER_BLOCK * 8) {
                 minheap.setHeapSize(storedMins);
-                minheap.buildHeap(); // Rebuild heap based on underlying heap
-                                     // array
-                storedMins = 0;
+                minheap.buildHeap();
             }
+            else {
+                minheap.setHeapSize(ByteFile.RECORDS_PER_BLOCK * 8);
+                minheap.buildHeap();
+            }
+            storedMins = 0;
         }
+        runFileParser.close();
         inputParser.replaceWith(runFileParser.getFileName());
         System.out.println(runList.size());
         return runList;
@@ -305,6 +307,7 @@ public class ReplacementSelection {
         long currentPos;
         // Initialize MinHeap for merging runs
         // Initialize MinHeap with capacity for 8 blocks of records
+        runFileParser.getFile().seek(0);
         Record[] emptyHeapArray = new Record[ByteFile.RECORDS_PER_BLOCK * 8];
         this.minheap = new MinHeap<>(emptyHeapArray, 0,
             ByteFile.RECORDS_PER_BLOCK * 8);

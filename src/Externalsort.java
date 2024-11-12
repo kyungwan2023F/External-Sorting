@@ -39,13 +39,13 @@ public class Externalsort {
      *            Command line parameters
      */
     public static void main(String[] args) {
-        if (args.length < 1) {
-            return;
-        }
+//        if (args.length < 1) {
+//            return;
+//        }
         // Get the filename from arguments
-        String filename = args[0];
+        //String filename = args[0];
         
-        //String filename = "testData/sampleInput16.bin";
+        String filename = "testData/sampleInput16.bin";
         try {
             // Initialize the Controller with the given filename
             Controller controller = new Controller(filename);
