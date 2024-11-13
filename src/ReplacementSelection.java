@@ -32,7 +32,7 @@ public class ReplacementSelection {
      * selection and merging processes.
      */
     private byte[] inputBuffer;
-    
+
     /**
      * A buffer for holding sorted records that will be written in blocks to the
      * output file.

@@ -52,7 +52,8 @@ public class Controller {
     /**
      * Create a new Controller object.
      * 
-     * @param filename
+     * @param inputFilename
+     *            the inputFilename, the path
      *            string
      * @throws IOException
      */

@@ -28,23 +28,19 @@ import java.io.IOException;
 // during the discussion. I have violated neither the spirit nor
 // letter of this restriction.
 
-public class Externalsort
-{
+public class Externalsort {
 
     /**
      * @param args
      *            Command line parameters
      */
-    public static void main(String[] args)
-    {
-        if (args.length < 1)
-        {
+    public static void main(String[] args) {
+        if (args.length < 1) {
             return;
         }
         // Get the filename from arguments
         String filename = args[0];
-        try
-        {
+        try {
             // Initialize the Controller with the given filename
             Controller controller = new Controller(filename);
 
@@ -52,11 +48,9 @@ public class Externalsort
             controller.performSorting();
 
         }
-        catch (IOException e)
-        {
-            System.err.println(
-                "An error occurred while processing the file: "
-                    + e.getMessage());
+        catch (IOException e) {
+            System.err.println("An error occurred while processing the file: "
+                + e.getMessage());
             e.printStackTrace();
         }
 

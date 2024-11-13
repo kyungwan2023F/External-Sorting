@@ -6,15 +6,12 @@ import student.TestCase;
  * @author Kyungwan Do, Jaeyoung Shin
  * @version 11/12/2024
  */
-public class ExternalsortTest
-    extends TestCase
-{
+public class ExternalsortTest extends TestCase {
 
     /**
      * set up for tests
      */
-    public void setUp()
-    {
+    public void setUp() {
         // nothing to set up.
     }
 
@@ -22,8 +19,7 @@ public class ExternalsortTest
     /**
      * T
      */
-    public void testExternalsort()
-    {
+    public void testExternalsort() {
         String[] args = { "MakeAFileUsingByteFile.data" };
         Externalsort.main(args);
     }

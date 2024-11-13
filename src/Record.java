@@ -4,16 +4,14 @@
  * @author CS Staff
  * @version Fall 2024
  */
-public class Record
-    implements Comparable<Record>
-{
+public class Record implements Comparable<Record> {
     /**
      * 16 bytes per record
      */
     public static final int BYTES = 16;
 
-    private long            recID;
-    private double          key;
+    private long recID;
+    private double key;
     private int runNum;
 
     /**
@@ -23,9 +21,10 @@ public class Record
      *            record ID
      * @param key
      *            record key
+     * @param runNum
+     *            the runNumber a unique number identifying each run
      */
-    public Record(long recID, double key,int runNum)
-    {
+    public Record(long recID, double key, int runNum) {
         this.recID = recID;
         this.key = key;
         this.runNum = runNum;
@@ -38,8 +37,7 @@ public class Record
      *
      * @return record ID
      */
-    public long getID()
-    {
+    public long getID() {
         return recID;
     }
 
@@ -50,15 +48,16 @@ public class Record
      *
      * @return record key
      */
-    public double getKey()
-    {
+    public double getKey() {
         return key;
     }
-    
+
+
     // ----------------------------------------------------------
     /**
-     * Place a description of your method here.
-     * @return
+     * removes the runNum of the record
+     * 
+     * @return the runNum
      */
     public int getRunNum() {
         return runNum;
@@ -72,8 +71,7 @@ public class Record
      * @return int
      */
     @Override
-    public int compareTo(Record toBeCompared)
-    {
+    public int compareTo(Record toBeCompared) {
         return Double.compare(this.key, toBeCompared.key);
     }
 }

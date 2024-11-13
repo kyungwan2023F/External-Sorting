@@ -198,6 +198,7 @@ class MinHeap<T extends Comparable<T>> {
         return heap[n];
     }
 
+
     /**
      * Replaces the minimum element (root) with a new value, then re-organizes
      * the heap to maintain the min-heap property.
@@ -233,6 +234,7 @@ class MinHeap<T extends Comparable<T>> {
         assert n > 0 : "Heap is empty; no minimum";
         return heap[0];
     }
+
 
     // ----------------------------------------------------------
     /**
