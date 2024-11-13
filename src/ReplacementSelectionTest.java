@@ -1,7 +1,22 @@
 import java.io.IOException;
 
+// -------------------------------------------------------------------------
+/**
+ *  Write a one-sentence summary of your class here.
+ *  Follow it with additional details about its purpose, what abstraction
+ *  it represents, and how to use it.
+ * 
+ *  @author kyung
+ *  @version Nov 12, 2024
+ */
 public class ReplacementSelectionTest {
 
+    // ----------------------------------------------------------
+    /**
+     * Place a description of your method here.
+     * @param args
+     * @throws IOException
+     */
     public static void main(String[] args) throws IOException {
         String filename = "testData.bin";
         int numBlocks = 10; // Define the number of blocks for testing
@@ -23,10 +38,5 @@ public class ReplacementSelectionTest {
             System.out.println("The file is not sorted correctly.");
         }
     }
-    // ~ Fields ................................................................
-
-    // ~ Constructors ..........................................................
-
-    // ~Public Methods ........................................................
 
 }

@@ -1,5 +1,6 @@
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.file.*;
 
 public class FileParser {
     // ~ Fields ................................................................
@@ -42,40 +43,36 @@ public class FileParser {
 
 
     /**
-     * Replaces the current file with the sorted file.
-     * 
+     * Replaces the current file with a new file by deleting the old file and
+     * renaming the new file.
+     *
      * @param newFilePath
-     *            Path of the new file to replace the current file with.
+     *            The path to the new file that will replace the current file.
      * @throws IOException
-     *             if any file operation fails.
+     *             If an I/O error occurs during the replacement process.
      */
     public void replaceWith(String newFilePath) throws IOException {
-        File oldFile = new File(this.filePath);
+        // Close the current RandomAccessFile to release system resources
+        this.close();
+        System.out.println("Closed original file: " + this.filePath);
+
+        File originalFile = new File(this.filePath);
         File newFile = new File(newFilePath);
 
-        // Close the current file before performing file operations
-        this.close();
-        newFile.close();
-
-        // Delete the old file if it exists
-        if (oldFile.exists()) {
-            if (!oldFile.delete()) {
-                throw new IOException("Failed to delete the old file.");
-            }
-        }
-        else {
-            throw new IOException("Old file doesn't exist.");
+        // Check if the new file exists before attempting to rename
+        if (!newFile.exists()) {
+            throw new IOException("The file to replace with does not exist: "
+                + newFilePath);
         }
 
-        // Rename the new file to have the same name as the old file
-        if (!newFile.renameTo(oldFile)) {
-            throw new IOException(
-                "Failed to rename the new file to the old file's name.");
+        // Delete the original file if it exists
+        if (originalFile.exists() && !originalFile.delete()) {
+            throw new IOException("Failed to delete the original file: "
+                + this.filePath);
         }
-
-        // Reopen the file after replacement and reset the RandomAccessFile
-        // instance
-        this.file = new RandomAccessFile(oldFile, "rw");
+        newFile.renameTo(originalFile);
+        // Reopen the replaced file for further operations
+        this.file = new RandomAccessFile(originalFile, "rw");
     }
 
 

@@ -57,7 +57,6 @@ public class Controller {
     private void initializeHeap() throws IOException {
         // Define a buffer to hold 8 blocks of data
         byte[] largeInputBuffer = new byte[ByteFile.BYTES_PER_BLOCK * 8];
-        long length = fileParser.getFile().length();
         // Use FileParser to read the first 8 blocks directly into the buffer
         if (fileParser.getFile().getFilePointer() == 0) { // Start from the
                                                           // beginning
@@ -96,9 +95,6 @@ public class Controller {
             DLList initialRuns = replacementSelection
                 .performReplacementSelection(fileParser, runFileParser);
 
-            // Ensure runFileParser is closed to flush data
-            runFileParser.close();
-
             // Phase 2: Perform Recursive Multiway Merge to sort all runs into
             // one
             // sorted file
@@ -136,4 +132,5 @@ public class Controller {
         }
         fileParser.close();
     }
+
 }

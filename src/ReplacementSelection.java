@@ -113,13 +113,11 @@ public class ReplacementSelection {
         FileParser inputParser,
         FileParser runFileParser)
         throws IOException {
-        runFileParser.getFile().seek(0);
         int inputIndex = 0;
         int outputIndex = 0;
         int storedMins = 0;
         ByteBuffer byteBuffer = ByteBuffer.allocate(0); // Empty buffer with
                                                         // zero capacity
-        long position = inputParser.getFile().getFilePointer();
         long start = 0; // Start position of the run
         long end = 0; // End position of the run
         DLList runList = new DLList();
@@ -162,10 +160,10 @@ public class ReplacementSelection {
                         Record record = new Record(recID, key, -1);
 
                         if (record.getKey() >= minRecord.getKey()) {
-                            minheap.replaceMin(record);
+                            minheap.modify(0, record);
                         }
                         else {
-                            minheap.replaceMin(record);
+                            minheap.modify(0, record);
                             minheap.removeMin();
                             storedMins++;
                         }
@@ -221,6 +219,10 @@ public class ReplacementSelection {
             storedMins = 0;
         }
         long length = runFileParser.getFile().length();
+        
+        System.out.println("Run file created at: " + runFileParser
+            .getFileName());
+        runFileParser.close();
         inputParser.replaceWith(runFileParser.getFileName());
         System.out.println(runList.size());
         return runList;
@@ -287,7 +289,7 @@ public class ReplacementSelection {
         for (int i = 0; i < newRunList.size(); i++) {
             runs.add(newRunList.get(i));
         }
-
+        mergeFileParser.close();
         // Replace old run file with the newly merged run file
         runFileParser.replaceWith(mergeFileParser.getFileName());
 
@@ -307,7 +309,6 @@ public class ReplacementSelection {
         long currentPos;
         // Initialize MinHeap for merging runs
         // Initialize MinHeap with capacity for 8 blocks of records
-        runFileParser.getFile().seek(0);
         Record[] emptyHeapArray = new Record[ByteFile.RECORDS_PER_BLOCK * 8];
         this.minheap = new MinHeap<>(emptyHeapArray, 0,
             ByteFile.RECORDS_PER_BLOCK * 8);
@@ -335,7 +336,7 @@ public class ReplacementSelection {
                 double key = byteBuffer.getDouble(); // Read 8 bytes for key
 
                 // Check if this is the last record in the block
-                if (rec == ByteFile.RECORDS_PER_BLOCK) {
+                if (rec >= ByteFile.RECORDS_PER_BLOCK) {
                     // If this is the last record, mark it with the runNum
                     Record record = new Record(recID, key, runsToMerge.get(i)
                         .getRunNum()); // put in run number for last record of
@@ -451,11 +452,24 @@ public class ReplacementSelection {
 
         }
 
-        // Write any remaining records in the output buffer
         if (outputIndex > 0) {
-            runFileParser.getFile().write(outputBuffer, 0, outputIndex);
+            // Set up a ByteBuffer around the outputBuffer to extract
+            // records
+            ByteBuffer bb = ByteBuffer.wrap(outputBuffer);
+
+            // Calculate the number of records to write based on outputIndex
+            int numRecords = outputIndex / ByteFile.BYTES_PER_RECORD;
+
+            for (int i = 0; i < numRecords; i++) {
+                long recID = bb.getLong(); // Extract the long (recID)
+                double key = bb.getDouble(); // Extract the double (key)
+
+                // Write the record directly to the file
+                runFileParser.getFile().writeLong(recID);
+                runFileParser.getFile().writeDouble(key);
+            }
             end += outputIndex;
-            outputIndex = 0; // Reset
+            outputIndex = 0; // Reset for the next run
         }
 
         long runLength = end - start;
