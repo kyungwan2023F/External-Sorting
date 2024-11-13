@@ -42,8 +42,7 @@ public class Externalsort
             return;
         }
         // Get the filename from arguments
-        // String filename = args[0];
-        String filename = "sampleInput16.bin";
+        String filename = args[0];
         try
         {
             // Initialize the Controller with the given filename

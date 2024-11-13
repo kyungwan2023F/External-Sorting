@@ -10,16 +10,43 @@ import java.nio.ByteOrder;
  * @version 11/12/2024
  */
 
-public class Controller
-{
+public class Controller {
     // ~ Fields ................................................................
-    private ReplacementSelection replacementSelection; // Replacement selection
-    private byte[] inputBuffer; // Input buffer
-    private byte[] outputBuffer; // Output buffer
-    private MinHeap<Record> minHeap; // Record in minHeap
-    private FileParser fileParser; // Input file parser for reading records
-    private FileParser runFileParser; // Parser for the intermediate run file
-    private FileParser mergeFileParser; // Parser for merged runs
+    /**
+     * The ReplacementSelection instance that handles the replacement selection
+     * sorting algorithm and merge process.
+     */
+    private ReplacementSelection replacementSelection;
+
+    /**
+     * Buffer for reading input data blocks from the input file.
+     */
+    private byte[] inputBuffer;
+
+    /**
+     * Buffer for writing output data blocks to the output file.
+     */
+    private byte[] outputBuffer;
+
+    /**
+     * MinHeap structure to manage Record objects during sorting.
+     */
+    private MinHeap<Record> minHeap;
+
+    /**
+     * FileParser instance for parsing and reading data from the input file.
+     */
+    private FileParser fileParser;
+
+    /**
+     * FileParser instance for managing intermediate runs during sorting.
+     */
+    private FileParser runFileParser;
+
+    /**
+     * FileParser instance for handling the final merged runs.
+     */
+    private FileParser mergeFileParser;
 
     // ----------------------------------------------------------
     /**
@@ -29,9 +56,7 @@ public class Controller
      *            string
      * @throws IOException
      */
-    public Controller(String inputFilename)
-        throws IOException
-    {
+    public Controller(String inputFilename) throws IOException {
         // Initialize buffers for reading and writing blocks
         this.inputBuffer = new byte[ByteFile.BYTES_PER_BLOCK];
         this.outputBuffer = new byte[ByteFile.BYTES_PER_BLOCK];
@@ -50,16 +75,16 @@ public class Controller
 
         // Initialize MinHeap with capacity for 8 blocks of records
         Record[] emptyHeapArray = new Record[ByteFile.RECORDS_PER_BLOCK * 8];
-        this.minHeap =
-            new MinHeap<>(emptyHeapArray, 0, ByteFile.RECORDS_PER_BLOCK * 8);
+        this.minHeap = new MinHeap<>(emptyHeapArray, 0,
+            ByteFile.RECORDS_PER_BLOCK * 8);
 
         // Populate heap with initial blocks of records
         this.initializeHeap();
 
         // Initialize ReplacementSelection with input and output buffers, and
         // minHeap
-        this.replacementSelection =
-            new ReplacementSelection(minHeap, inputBuffer, outputBuffer);
+        this.replacementSelection = new ReplacementSelection(minHeap,
+            inputBuffer, outputBuffer);
     }
 
 
@@ -69,15 +94,12 @@ public class Controller
      * 
      * @throws IOException
      */
-    private void initializeHeap()
-        throws IOException
-    {
+    private void initializeHeap() throws IOException {
         // Define a buffer to hold 8 blocks of data
         byte[] largeInputBuffer = new byte[ByteFile.BYTES_PER_BLOCK * 8];
         // Use FileParser to read the first 8 blocks directly into the buffer
-        if (fileParser.getFile().getFilePointer() == 0)
-        { // Start from the
-          // beginning
+        if (fileParser.getFile().getFilePointer() == 0) { // Start from the
+                                                          // beginning
             fileParser.getFile().readFully(largeInputBuffer);
         }
 
@@ -85,8 +107,7 @@ public class Controller
         ByteBuffer byteBuffer = ByteBuffer.wrap(largeInputBuffer);
 
         // Iterate over each record in the buffer and add to the heap
-        for (int rec = 0; rec < ByteFile.RECORDS_PER_BLOCK * 8; rec++)
-        {
+        for (int rec = 0; rec < ByteFile.RECORDS_PER_BLOCK * 8; rec++) {
             long recID = byteBuffer.getLong(); // Read 8 bytes for recID
             double key = byteBuffer.getDouble(); // Read 8 bytes for key
 
@@ -103,15 +124,11 @@ public class Controller
      * 
      * @throws IOException
      */
-    public void performSorting()
-        throws IOException
-    {
-        if (fileParser.getFile().length() <= ByteFile.BYTES_PER_BLOCK * 8)
-        {
+    public void performSorting() throws IOException {
+        if (fileParser.getFile().length() <= ByteFile.BYTES_PER_BLOCK * 8) {
             replacementSelection.inMemorySort(fileParser);
         }
-        else
-        {
+        else {
             // Phase 1: Perform Replacement Selection Sort to create initial
             // sorted
             // runs
@@ -124,10 +141,8 @@ public class Controller
             // Perform recursive multiway merge on the initial runs until there
             // is only one run left
             runFileParser = new FileParser("intermediateRuns.bin");
-            replacementSelection.recursiveMultiwayMerge(
-                runFileParser,
-                mergeFileParser,
-                initialRuns);
+            replacementSelection.recursiveMultiwayMerge(runFileParser,
+                mergeFileParser, initialRuns);
         }
         this.report();
     }
@@ -139,16 +154,13 @@ public class Controller
      * 
      * @throws IOException
      */
-    private void report()
-        throws IOException
-    {
+    private void report() throws IOException {
         fileParser.getFile().seek(0);
 
         int recordsPerLine = 0; // Counter to track the number of records
                                 // printed per line
 
-        while (fileParser.readNextBlock(inputBuffer) != -1)
-        {
+        while (fileParser.readNextBlock(inputBuffer) != -1) {
             // Read the first record of the block (16 bytes)
             ByteBuffer byteBuffer = ByteBuffer.wrap(inputBuffer);
             long recID = byteBuffer.getLong(); // Get the record ID
@@ -159,8 +171,7 @@ public class Controller
             recordsPerLine++;
 
             // Print a new line after every 5 records
-            if (recordsPerLine == 5)
-            {
+            if (recordsPerLine == 5) {
                 System.out.println();
                 recordsPerLine = 0;
             }
