@@ -54,7 +54,6 @@ public class FileParser {
     public void replaceWith(String newFilePath) throws IOException {
         // Close the current RandomAccessFile to release system resources
         this.close();
-        System.out.println("Closed original file: " + this.filePath);
 
         File originalFile = new File(this.filePath);
         File newFile = new File(newFilePath);

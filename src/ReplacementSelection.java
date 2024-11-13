@@ -220,8 +220,6 @@ public class ReplacementSelection {
         }
         long length = runFileParser.getFile().length();
         
-        System.out.println("Run file created at: " + runFileParser
-            .getFileName());
         runFileParser.close();
         inputParser.replaceWith(runFileParser.getFileName());
         System.out.println(runList.size());
