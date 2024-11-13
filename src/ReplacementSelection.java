@@ -1,23 +1,55 @@
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+// -------------------------------------------------------------------------
+/**
+ * ReplacementSelection is a class that handles replacement selection sorting
+ * for data stored in
+ * binary files. This class operates on records organized into blocks and
+ * utilizes a min-heap
+ * to manage sorting and merging processes. It performs sorting
+ * directly in memory when blocks are equal to or less than 8 and for sizes
+ * larger, it utilizes replacement selection to create the long runs
+ * 
+ * This class works with instances of FileParser for file operations, and
+ * MinHeap for managing
+ * sorting.
+ * 
+ * @author Kyungwan Do, Jaeyoung Shin
+ * @version Nov 12, 2024
+ */
 public class ReplacementSelection {
     // ~ Fields ................................................................
+    /**
+     * The min-heap structure used for managing the sorting process
+     */
     private MinHeap<Record> minheap;
+
+    /**
+     * A buffer for reading blocks of data from the input file during the
+     * replacement
+     * selection and merging processes.
+     */
     private byte[] inputBuffer;
+    
+    /**
+     * A buffer for holding sorted records that will be written in blocks to the
+     * output file.
+     */
     private byte[] outputBuffer;
 
     // ~ Constructors ..........................................................
     // ----------------------------------------------------------
     /**
-     * Create a new ReplacementSelection object.
+     * Creates a new ReplacementSelection object.
      * 
      * @param minheap
+     *            the minheap used for managing records during sorting
      * @param inputBuffer
+     *            the buffer used to read data from input files
      * @param outputBuffer
+     *            the buffer used to store sorted data before writing
      */
     public ReplacementSelection(
         MinHeap<Record> minheap,
@@ -27,27 +59,20 @@ public class ReplacementSelection {
         this.inputBuffer = inputBuffer;
         this.outputBuffer = outputBuffer;
     }
-// public ReplacementSelection(FileParser parser) {
-// Record[] emptyHeapArray = new Record[ByteFile.RECORDS_PER_BLOCK * 8];
-// this.minheap = new MinHeap<>(emptyHeapArray, 0,
-// ByteFile.RECORDS_PER_BLOCK * 8);
-//
-// this.inputBuffer = new byte[ByteFile.BYTES_PER_BLOCK];
-// this.outputBuffer = new byte[ByteFile.BYTES_PER_BLOCK];
-//
-// this.fileParser = parser;
-// }
 
 
     // ~Public Methods ........................................................
     // ----------------------------------------------------------
     /**
-     * Place a description of your method here.
-     * 
+     * Sorts the contents of the min-heap in memory and writes the sorted
+     * records
+     * to the specified output file.
+     *
      * @param fileParser
-     *            the fileParser object so that we can write into existing file
-     * 
+     *            the FileParser used to access and write data to the output
+     *            file
      * @throws IOException
+     *             if an I/O error occurs during file operations
      */
     public void inMemorySort(FileParser fileParser) throws IOException {
         int outputIndex = 0;
@@ -81,33 +106,19 @@ public class ReplacementSelection {
 
     // ----------------------------------------------------------
     /**
-     * Place a description of your method here.
-     * 
-     * @param outputBuffer
-     * @return
-     */
-    public List<Record> convertOutputBufferToRecords(byte[] outputBuffer) {
-        List<Record> records = new ArrayList<>();
-        ByteBuffer byteBuffer = ByteBuffer.wrap(outputBuffer);
-
-        while (byteBuffer.remaining() >= ByteFile.BYTES_PER_RECORD) {
-            long recID = byteBuffer.getLong();
-            double key = byteBuffer.getDouble();
-            records.add(new Record(recID, key, -1));
-        }
-
-        return records;
-    }
-
-
-    // ----------------------------------------------------------
-    /**
-     * Place a description of your method here.
+     * Executes the replacement selection algorithm to create long sorted runs.
+     * It
+     * iteratively
+     * processes input blocks and generates
+     * sorted runs that are written to the run file.
      * 
      * @param inputParser
+     *            the FileParser for reading the input data
      * @param runFileParser
-     * @return
+     *            the FileParser for writing sorted runs to the output
+     * @return a doubly linked list containing run objects
      * @throws IOException
+     *             if an I/O error occurs during file operations
      */
     public DLList performReplacementSelection(
         FileParser inputParser,
@@ -219,7 +230,7 @@ public class ReplacementSelection {
             storedMins = 0;
         }
         long length = runFileParser.getFile().length();
-        
+
         runFileParser.close();
         inputParser.replaceWith(runFileParser.getFileName());
         System.out.println(runList.size());
@@ -296,6 +307,23 @@ public class ReplacementSelection {
     }
 
 
+    // ----------------------------------------------------------
+    /**
+     * Merges multiple runs from a specified batch of runs into a single run,
+     * utilizing a min-heap to maintain the sorted order during merging.
+     * 
+     * @param runFileParser
+     *            the FileParser to read each run’s data
+     * @param mergeFileParser
+     *            the FileParser to store merged run data
+     * @param runsToMerge
+     *            the list of runs to be merged
+     * @param groupRunNum
+     *            the identifier number for the merged run
+     * @return the resulting Run object that represents the merged data
+     * @throws IOException
+     *             if an I/O error occurs during file operations
+     */
     private Run mergeRuns(
         FileParser runFileParser,
         FileParser mergeFileParser,
@@ -477,6 +505,18 @@ public class ReplacementSelection {
     }
 
 
+    // ----------------------------------------------------------
+    /**
+     * Adds a record to the output buffer and increments the output index.
+     * 
+     * @param record
+     *            the Record to be added to the buffer
+     * @param outputIndex
+     *            the current index in the output buffer
+     * @return the updated output index after adding the record
+     * @throws IOException
+     *             if an I/O error occurs during buffer manipulation
+     */
     private int addToOutputBuffer(Record record, int outputIndex)
         throws IOException {
         ByteBuffer idBuffer = ByteBuffer.allocate(Long.BYTES);
