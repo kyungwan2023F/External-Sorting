@@ -1,22 +1,33 @@
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class DLList {
+// -------------------------------------------------------------------------
+/**
+ * This class provides an iterator for the DLList data structure specifically
+ * for `Run` objects.
+ * 
+ * @author Kyungwan Do, Jaeyoung Shin
+ * @version Nov 12, 2024
+ */
+public class DLList
+{
 
     // -------------------------------------------------------------------------
     /**
      * This class provides an iterator for the DLList data structure
-     * specifically
-     * for `Run` objects.
+     * specifically for `Run` objects.
      */
-    public class DLListRunIterator implements Iterator<Run> {
-        private Node<Run> next;
-        private boolean calledNext;
+    public class DLListRunIterator
+        implements Iterator<Run>
+    {
+        private Node<Run> next; // Next node
+        private boolean calledNext; // If next is called
 
         /**
          * Creates a new DLListRunIterator.
          */
-        public DLListRunIterator() {
+        public DLListRunIterator()
+        {
             next = head.next();
             calledNext = false;
         }
@@ -28,7 +39,8 @@ public class DLList {
          * @return true if there are more elements in the list.
          */
         @Override
-        public boolean hasNext() {
+        public boolean hasNext()
+        {
             return next != tail;
         }
 
@@ -41,8 +53,10 @@ public class DLList {
          *             if there are no nodes left in the list.
          */
         @Override
-        public Run next() {
-            if (!hasNext()) {
+        public Run next()
+        {
+            if (!hasNext())
+            {
                 throw new NoSuchElementException(
                     "No more elements in the list");
             }
@@ -58,7 +72,8 @@ public class DLList {
      *
      * @return new Iterator object.
      */
-    public Iterator<Run> iterator() {
+    public Iterator<Run> iterator()
+    {
         return new DLListRunIterator();
     }
 
@@ -67,7 +82,8 @@ public class DLList {
      * This node stores data, a pointer to the node before it, and a pointer to
      * the node after it.
      */
-    private static class Node<T> {
+    private static class Node<T>
+    {
         private Node<T> next;
         private Node<T> previous;
         private T data;
@@ -78,7 +94,8 @@ public class DLList {
          * @param d
          *            the data to put inside the node.
          */
-        public Node(T d) {
+        public Node(T d)
+        {
             data = d;
         }
 
@@ -89,7 +106,8 @@ public class DLList {
          * @param n
          *            the node after this one.
          */
-        public void setNext(Node<T> n) {
+        public void setNext(Node<T> n)
+        {
             next = n;
         }
 
@@ -100,7 +118,8 @@ public class DLList {
          * @param n
          *            the node before this one.
          */
-        public void setPrevious(Node<T> n) {
+        public void setPrevious(Node<T> n)
+        {
             previous = n;
         }
 
@@ -110,7 +129,8 @@ public class DLList {
          *
          * @return the next node.
          */
-        public Node<T> next() {
+        public Node<T> next()
+        {
             return next;
         }
 
@@ -120,7 +140,8 @@ public class DLList {
          *
          * @return the node before this one.
          */
-        public Node<T> previous() {
+        public Node<T> previous()
+        {
             return previous;
         }
 
@@ -130,7 +151,8 @@ public class DLList {
          *
          * @return the data in the node.
          */
-        public T getData() {
+        public T getData()
+        {
             return data;
         }
     }
@@ -155,7 +177,8 @@ public class DLList {
     /**
      * Create a new DLListRun object.
      */
-    public DLList() {
+    public DLList()
+    {
         init();
     }
 
@@ -163,7 +186,8 @@ public class DLList {
     /**
      * Initializes the object to have the head and tail nodes.
      */
-    private void init() {
+    private void init()
+    {
         head = new Node<>(null);
         tail = new Node<>(null);
         head.setNext(tail);
@@ -177,7 +201,8 @@ public class DLList {
      *
      * @return true if the list is empty.
      */
-    public boolean isEmpty() {
+    public boolean isEmpty()
+    {
         return size == 0;
     }
 
@@ -187,7 +212,8 @@ public class DLList {
      *
      * @return the number of elements.
      */
-    public int size() {
+    public int size()
+    {
         return size;
     }
 
@@ -195,7 +221,8 @@ public class DLList {
     /**
      * Removes all of the elements from the list.
      */
-    public void clear() {
+    public void clear()
+    {
         init();
     }
 
@@ -207,7 +234,8 @@ public class DLList {
      *            the `Run` object to check for.
      * @return true if it contains the object.
      */
-    public boolean contains(Run run) {
+    public boolean contains(Run run)
+    {
         return lastIndexOf(run) != -1;
     }
 
@@ -221,7 +249,8 @@ public class DLList {
      * @throws IndexOutOfBoundsException
      *             if there no node at the given index.
      */
-    public Run get(int index) {
+    public Run get(int index)
+    {
         return getNodeAtIndex(index).getData();
     }
 
@@ -232,7 +261,8 @@ public class DLList {
      * @param newRun
      *            the `Run` object to add to the end.
      */
-    public void add(Run newRun) {
+    public void add(Run newRun)
+    {
         add(size(), newRun);
     }
 
@@ -249,11 +279,14 @@ public class DLList {
      * @throws IllegalArgumentException
      *             if run is null.
      */
-    public void add(int index, Run run) {
-        if (index < 0 || size < index) {
+    public void add(int index, Run run)
+    {
+        if (index < 0 || size < index)
+        {
             throw new IndexOutOfBoundsException();
         }
-        if (run == null) {
+        if (run == null)
+        {
             throw new IllegalArgumentException(
                 "Cannot add null objects to a list");
         }
@@ -276,13 +309,16 @@ public class DLList {
      *            the index to retrieve the node.
      * @return node at index.
      */
-    private Node<Run> getNodeAtIndex(int index) {
-        if (index < 0 || size() <= index) {
-            throw new IndexOutOfBoundsException("No element exists at "
-                + index);
+    private Node<Run> getNodeAtIndex(int index)
+    {
+        if (index < 0 || size() <= index)
+        {
+            throw new IndexOutOfBoundsException(
+                "No element exists at " + index);
         }
         Node<Run> current = head.next();
-        for (int i = 0; i < index; i++) {
+        for (int i = 0; i < index; i++)
+        {
             current = current.next();
         }
         return current;
@@ -296,10 +332,13 @@ public class DLList {
      *            the `Run` object to look for.
      * @return the last position of it, or -1 if it is not in the list.
      */
-    public int lastIndexOf(Run run) {
+    public int lastIndexOf(Run run)
+    {
         Node<Run> current = tail.previous();
-        for (int i = size() - 1; i >= 0; i--) {
-            if (current.getData().equals(run)) {
+        for (int i = size() - 1; i >= 0; i--)
+        {
+            if (current.getData().equals(run))
+            {
                 return i;
             }
             current = current.previous();
@@ -315,7 +354,8 @@ public class DLList {
      *            the index where the object is located.
      * @return true if successful.
      */
-    public boolean remove(int index) {
+    public boolean remove(int index)
+    {
         Node<Run> nodeToBeRemoved = getNodeAtIndex(index);
         nodeToBeRemoved.previous().setNext(nodeToBeRemoved.next());
         nodeToBeRemoved.next().setPrevious(nodeToBeRemoved.previous());
@@ -331,10 +371,13 @@ public class DLList {
      *            the `Run` object to remove.
      * @return true if the object was found and removed.
      */
-    public boolean removeRun(int runNumber) {
+    public boolean removeRun(int runNumber)
+    {
         Node<Run> current = head.next();
-        while (current != tail) {
-            if (current.getData().getRunNum() == runNumber) {
+        while (current != tail)
+        {
+            if (current.getData().getRunNum() == runNumber)
+            {
                 // Found the node with the specified runNumber, remove it.
                 current.previous().setNext(current.next());
                 current.next().setPrevious(current.previous());
@@ -354,12 +397,15 @@ public class DLList {
      * @param runNumber
      *            the run number to find.
      * @return the `Run` object with the specified runNumber, or `null` if not
-     *         found.
+     *             found.
      */
-    public Run getRunByNumber(int runNumber) {
+    public Run getRunByNumber(int runNumber)
+    {
         Node<Run> current = head.next();
-        while (current != tail) {
-            if (current.getData().getRunNum() == runNumber) {
+        while (current != tail)
+        {
+            if (current.getData().getRunNum() == runNumber)
+            {
                 // Found the node with the specified runNumber, return the Run
                 // object.
                 return current.getData();
@@ -377,14 +423,18 @@ public class DLList {
      * @return a string representing the list.
      */
     @Override
-    public String toString() {
+    public String toString()
+    {
         StringBuilder builder = new StringBuilder("{");
-        if (!isEmpty()) {
+        if (!isEmpty())
+        {
             Node<Run> currNode = head.next();
-            while (currNode != tail) {
+            while (currNode != tail)
+            {
                 Run element = currNode.getData();
                 builder.append(element.toString());
-                if (currNode.next != tail) {
+                if (currNode.next != tail)
+                {
                     builder.append(", ");
                 }
                 currNode = currNode.next();

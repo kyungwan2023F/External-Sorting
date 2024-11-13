@@ -1,16 +1,11 @@
-
-/**
- * {Project Description Here}
- */
-
 import java.io.File;
 import java.io.IOException;
 
 /**
  * The class containing the main method.
  *
- * @author {Jae Young}
- * @version {Put Something Here}
+ * @author Kyungwan Do, Jaeyoung Shin
+ * @version 11/12/2024
  */
 
 // On my honor:
@@ -33,20 +28,24 @@ import java.io.IOException;
 // during the discussion. I have violated neither the spirit nor
 // letter of this restriction.
 
-public class Externalsort {
+public class Externalsort
+{
 
     /**
      * @param args
      *            Command line parameters
      */
-    public static void main(String[] args) {
-        if (args.length < 1) {
+    public static void main(String[] args)
+    {
+        if (args.length < 1)
+        {
             return;
         }
         // Get the filename from arguments
-        //String filename = args[0];
+        // String filename = args[0];
         String filename = "sampleInput16.bin";
-        try {
+        try
+        {
             // Initialize the Controller with the given filename
             Controller controller = new Controller(filename);
 
@@ -54,9 +53,11 @@ public class Externalsort {
             controller.performSorting();
 
         }
-        catch (IOException e) {
-            System.err.println("An error occurred while processing the file: "
-                + e.getMessage());
+        catch (IOException e)
+        {
+            System.err.println(
+                "An error occurred while processing the file: "
+                    + e.getMessage());
             e.printStackTrace();
         }
 

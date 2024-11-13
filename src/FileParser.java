@@ -2,10 +2,19 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.file.*;
 
-public class FileParser {
+// -------------------------------------------------------------------------
+/**
+ * FileParser class provides methods to read, write, replace, and check
+ * remaining data in a binary file using RandomAccessFile operations.
+ * 
+ * @author Kyungwan Do, Jaeyoung Shin
+ * @version Nov 12, 2024
+ */
+public class FileParser
+{
     // ~ Fields ................................................................
-    private RandomAccessFile file;
-    private String filePath;
+    private RandomAccessFile file; // file
+    private String filePath; // file path
 
     // ~ Constructors ..........................................................
     /**
@@ -16,7 +25,9 @@ public class FileParser {
      * @throws IOException
      *             if the file cannot be opened.
      */
-    public FileParser(String filename) throws IOException {
+    public FileParser(String filename)
+        throws IOException
+    {
         this.file = new RandomAccessFile(new File(filename), "rw");
         this.filePath = filename;
     }
@@ -27,7 +38,8 @@ public class FileParser {
      *
      * @return The name of the file.
      */
-    public String getFileName() {
+    public String getFileName()
+    {
         return this.filePath;
     }
 
@@ -37,7 +49,8 @@ public class FileParser {
      *
      * @return The name of the file.
      */
-    public RandomAccessFile getFile() {
+    public RandomAccessFile getFile()
+    {
         return this.file;
     }
 
@@ -51,7 +64,9 @@ public class FileParser {
      * @throws IOException
      *             If an I/O error occurs during the replacement process.
      */
-    public void replaceWith(String newFilePath) throws IOException {
+    public void replaceWith(String newFilePath)
+        throws IOException
+    {
         // Close the current RandomAccessFile to release system resources
         this.close();
 
@@ -59,15 +74,17 @@ public class FileParser {
         File newFile = new File(newFilePath);
 
         // Check if the new file exists before attempting to rename
-        if (!newFile.exists()) {
-            throw new IOException("The file to replace with does not exist: "
-                + newFilePath);
+        if (!newFile.exists())
+        {
+            throw new IOException(
+                "The file to replace with does not exist: " + newFilePath);
         }
 
         // Delete the original file if it exists
-        if (originalFile.exists() && !originalFile.delete()) {
-            throw new IOException("Failed to delete the original file: "
-                + this.filePath);
+        if (originalFile.exists() && !originalFile.delete())
+        {
+            throw new IOException(
+                "Failed to delete the original file: " + this.filePath);
         }
         newFile.renameTo(originalFile);
         // Reopen the replaced file for further operations
@@ -81,16 +98,20 @@ public class FileParser {
      * @param buffer
      *            input buffer to store data (exactly buffer.length bytes).
      * @return the number of bytes actually read, or -1 if end of file was
-     *         reached before any bytes were read.
+     *             reached before any bytes were read.
      * @throws IOException
      *             if there is an error reading the file.
      */
-    public int readNextBlock(byte[] buffer) throws IOException {
-        try {
+    public int readNextBlock(byte[] buffer)
+        throws IOException
+    {
+        try
+        {
             file.readFully(buffer);
             return buffer.length;
         }
-        catch (EOFException e) {
+        catch (EOFException e)
+        {
             // Return -1 if end of file is reached before filling the buffer
             return -1;
         }
@@ -103,8 +124,11 @@ public class FileParser {
      * @throws IOException
      *             if an error occurs while closing the file.
      */
-    public void close() throws IOException {
-        if (file != null) {
+    public void close()
+        throws IOException
+    {
+        if (file != null)
+        {
             file.close();
         }
     }
@@ -118,12 +142,15 @@ public class FileParser {
      * @throws IOException
      *             if there is an error writing to the file.
      */
-    public void writeBlock(byte[] buffer) throws IOException {
+    public void writeBlock(byte[] buffer)
+        throws IOException
+    {
         // Set up a ByteBuffer around the buffer
         ByteBuffer bb = ByteBuffer.wrap(buffer);
 
         // Iterate over each record in the buffer and write them individually
-        for (int i = 0; i < ByteFile.RECORDS_PER_BLOCK; i++) {
+        for (int i = 0; i < ByteFile.RECORDS_PER_BLOCK; i++)
+        {
             long recID = bb.getLong();
             double key = bb.getDouble();
 
@@ -136,12 +163,14 @@ public class FileParser {
 
     // ----------------------------------------------------------
     /**
-     * Place a description of your method here.
+     * Checks if it has remaining data.
      * 
-     * @return
+     * @return true or false
      * @throws IOException
      */
-    public boolean hasRemainingData() throws IOException {
+    public boolean hasRemainingData()
+        throws IOException
+    {
         return file.getFilePointer() < file.length();
     }
 
